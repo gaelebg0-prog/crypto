@@ -17,6 +17,7 @@ const AdvancedChart: React.FC<AdvancedChartProps> = ({ data, type, color = '#636
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
+    // Initialize chart
     const chart = createChart(chartContainerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
@@ -31,18 +32,14 @@ const AdvancedChart: React.FC<AdvancedChartProps> = ({ data, type, color = '#636
       timeScale: {
         borderColor: 'rgba(255, 255, 255, 0.1)',
         timeVisible: true,
-        secondsVisible: false,
-      },
-      rightPriceScale: {
-        borderColor: 'rgba(255, 255, 255, 0.1)',
       },
     });
 
     chartRef.current = chart;
 
     const handleResize = () => {
-      if (chartContainerRef.current) {
-        chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+      if (chartContainerRef.current && chartRef.current) {
+        chartRef.current.applyOptions({ width: chartContainerRef.current.clientWidth });
       }
     };
 
@@ -50,42 +47,49 @@ const AdvancedChart: React.FC<AdvancedChartProps> = ({ data, type, color = '#636
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      chart.remove();
+      if (chartRef.current) {
+        chartRef.current.remove();
+        chartRef.current = null;
+      }
     };
   }, []);
 
   useEffect(() => {
-    if (!chartRef.current) return;
+    if (!chartRef.current || !data.length) return;
 
-    // Clean previous series
+    // Remove existing series before adding a new one
     if (seriesRef.current) {
       chartRef.current.removeSeries(seriesRef.current);
+      seriesRef.current = null;
     }
 
-    if (type === 'candlestick') {
-      const candlestickSeries = chartRef.current.addCandlestickSeries({
-        upColor: '#10b981',
-        downColor: '#f43f5e',
-        borderVisible: false,
-        wickUpColor: '#10b981',
-        wickDownColor: '#f43f5e',
-      });
-      candlestickSeries.setData(data as any);
-      seriesRef.current = candlestickSeries;
-    } else {
-      const areaSeries = chartRef.current.addAreaSeries({
-        lineColor: color,
-        topColor: `${color}44`,
-        bottomColor: `${color}00`,
-        lineWidth: 2,
-      });
-      // Convert to line format if needed
-      const lineData = data.map(d => ('value' in d ? d : { time: d.time, value: (d as OHLCPoint).close }));
-      areaSeries.setData(lineData);
-      seriesRef.current = areaSeries;
+    try {
+      if (type === 'candlestick') {
+        const candlestickSeries = chartRef.current.addCandlestickSeries({
+          upColor: '#10b981',
+          downColor: '#f43f5e',
+          borderVisible: false,
+          wickUpColor: '#10b981',
+          wickDownColor: '#f43f5e',
+        });
+        candlestickSeries.setData(data as any);
+        seriesRef.current = candlestickSeries;
+      } else {
+        const areaSeries = chartRef.current.addAreaSeries({
+          lineColor: color,
+          topColor: `${color}33`,
+          bottomColor: `${color}00`,
+          lineWidth: 2,
+        });
+        const lineData = data.map(d => ('value' in d ? d : { time: d.time, value: (d as OHLCPoint).close }));
+        areaSeries.setData(lineData);
+        seriesRef.current = areaSeries;
+      }
+      
+      chartRef.current.timeScale().fitContent();
+    } catch (e) {
+      console.warn("Chart data update failed:", e);
     }
-
-    chartRef.current.timeScale().fitContent();
   }, [data, type, color]);
 
   return <div ref={chartContainerRef} className="w-full h-[400px]" />;
