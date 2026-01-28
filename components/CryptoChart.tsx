@@ -9,7 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { ChartDataPoint } from '../types';
+import { ChartDataPoint } from '../types.ts';
 
 interface CryptoChartProps {
   data: ChartDataPoint[];

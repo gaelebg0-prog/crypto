@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Coin } from './types';
-import { fetchTopCoins } from './services/cryptoApi';
-import CryptoDetail from './components/CryptoDetail';
+import { Coin } from './types.ts';
+import { fetchTopCoins } from './services/cryptoApi.ts';
+import CryptoDetail from './components/CryptoDetail.tsx';
 
 const App: React.FC = () => {
   const [coins, setCoins] = useState<Coin[]>([]);

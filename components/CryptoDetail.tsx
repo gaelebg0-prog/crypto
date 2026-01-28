@@ -1,9 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import { Coin, ChartDataPoint } from '../types';
-import { fetchCoinHistory } from '../services/cryptoApi';
-import { getMarketAnalysis } from '../services/geminiService';
-import CryptoChart from './CryptoChart';
+import { Coin, ChartDataPoint } from '../types.ts';
+import { fetchCoinHistory } from '../services/cryptoApi.ts';
+import { getMarketAnalysis } from '../services/geminiService.ts';
+import CryptoChart from './CryptoChart.tsx';
 
 interface CryptoDetailProps {
   coin: Coin;
