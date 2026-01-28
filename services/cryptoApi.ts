@@ -1,5 +1,5 @@
 
-import { Coin, MarketHistory } from '../types.ts';
+import { Coin, MarketHistory, OHLCPoint } from '../types.ts';
 
 const BASE_URL = 'https://api.coingecko.com/api/v3';
 
@@ -29,13 +29,23 @@ export const fetchCoinHistory = async (coinId: string, days: number = 7): Promis
   }
 };
 
-export const searchCoins = async (query: string): Promise<any> => {
+export const fetchCoinOHLC = async (coinId: string, days: number = 7): Promise<OHLCPoint[]> => {
   try {
-    const response = await fetch(`${BASE_URL}/search?query=${query}`);
-    if (!response.ok) throw new Error('Search failed');
-    return await response.json();
+    // Note: CoinGecko limit OHLC days options to 1, 7, 14, 30, 90, 180, 365
+    const response = await fetch(
+      `${BASE_URL}/coins/${coinId}/ohlc?vs_currency=usd&days=${days}`
+    );
+    if (!response.ok) throw new Error('Failed to fetch OHLC');
+    const data: [number, number, number, number, number][] = await response.json();
+    return data.map(([time, open, high, low, close]) => ({
+      time: time / 1000, // lightweight-charts expects seconds
+      open,
+      high,
+      low,
+      close
+    }));
   } catch (error) {
-    console.error('Error searching coins:', error);
-    return { coins: [] };
+    console.error(`Error fetching OHLC for ${coinId}:`, error);
+    return [];
   }
 };

@@ -17,8 +17,16 @@ export interface Coin {
 }
 
 export interface ChartDataPoint {
-  date: string;
-  price: number;
+  time: number; // Unix timestamp in seconds
+  value: number;
+}
+
+export interface OHLCPoint {
+  time: number; // Unix timestamp in seconds
+  open: number;
+  high: number;
+  low: number;
+  close: number;
 }
 
 export interface MarketHistory {
